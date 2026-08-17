@@ -123,10 +123,13 @@ body {
   user-select: none;
 }
 
-/* Sits behind the frame and shows through its transparent screen aperture. */
+/* Sits behind the frame and shows through its transparent screen aperture.
+   Opaque so the corner grids never bleed through the display; the video, once
+   added, covers this fill entirely. */
 .phone-screen {
   position: absolute;
   z-index: 0;
+  background: var(--beige);
   top: var(--screen-top);
   left: var(--screen-left);
   width: var(--screen-width);
@@ -199,6 +202,36 @@ body {
   outline-offset: calc(3 * var(--s));
 }
 
+/* Corner grid motifs — squares.png (1081 square, transparent, black lines).
+   Anchored to the corners so they stay tucked into them at any viewport size,
+   bleeding off-canvas by the same amount as the design. First in the DOM, so
+   everything else paints over them.
+
+   Mobile sizing is my own adaptation: the mobile Figma frame has not been
+   updated with these yet, so the desktop bleed ratios are carried over at a
+   size that suits the 393-wide frame. On mobile the phone fills the
+   bottom-right corner, so that motif tucks in behind the device. */
+.squares {
+  position: absolute;
+  pointer-events: none;
+  user-select: none;
+}
+
+.squares-tl {
+  top: calc(-26 * var(--s));
+  left: calc(-18 * var(--s));
+  width: calc(200 * var(--s));
+  height: calc(200 * var(--s));
+  transform: rotate(90deg);
+}
+
+.squares-br {
+  right: calc(-6.5 * var(--s));
+  bottom: calc(-7.7 * var(--s));
+  width: calc(200 * var(--s));
+  height: calc(200 * var(--s));
+}
+
 /* --------------------------------------------------------------------------
    Desktop (Figma frame 1440 x 1024)
    -------------------------------------------------------------------------- */
@@ -242,5 +275,24 @@ body {
     bottom: calc(64 * var(--s));
     width: calc(296 * var(--s));
     padding: 0 calc(14 * var(--s)) 0 calc(12 * var(--s));
+  }
+
+  /* Corner grids — exact Figma geometry.
+     Top-left  (10:242): 379.816 square, rotated 90deg CW, spanning
+                         x -34.817 -> 345, y -50 -> 329.816
+     Bottom-right (10:241): 380.297 square at x 1072, y 658.299, i.e. 12.297
+                         past the right edge and 14.596 past the bottom */
+  .squares-tl {
+    top: calc(-50 * var(--s));
+    left: calc(-34.817 * var(--s));
+    width: calc(379.816 * var(--s));
+    height: calc(379.816 * var(--s));
+  }
+
+  .squares-br {
+    right: calc(-12.297 * var(--s));
+    bottom: calc(-14.596 * var(--s));
+    width: calc(380.297 * var(--s));
+    height: calc(380.297 * var(--s));
   }
 }
