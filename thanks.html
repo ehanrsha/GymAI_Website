@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>GymAI — Thank you.</title>
+<meta name="description" content="You're on the GymAI waitlist.">
+<meta name="theme-color" content="#dacec2">
+<meta name="robots" content="noindex">
+
+<link rel="icon" href="Assets/gymai_logo_transparent_v02_8.17.2026.PNG">
+<link rel="preload" href="Fonts/Switzer-Light.ttf" as="font" type="font/ttf" crossorigin>
+<link rel="preload" href="Fonts/Switzer-Semibold.ttf" as="font" type="font/ttf" crossorigin>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <main class="page">
+
+    <img class="squares squares-tl" src="Assets/squares.png" alt="" aria-hidden="true">
+    <img class="squares squares-br" src="Assets/squares.png" alt="" aria-hidden="true">
+
+    <div class="panel">
+
+      <div class="tick" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+             stroke-linecap="round" stroke-linejoin="round">
+          <path d="M5 12.5l4.5 4.5L19 6.5"></path>
+        </svg>
+      </div>
+
+      <h1 class="panel-title"><strong>Thank you.</strong><br>You're on the list.</h1>
+
+      <p class="panel-sub" id="sub">
+        We've saved your spot. You'll hear from us the moment GymAI is ready.
+      </p>
+
+      <a class="back" href="index.html">
+        Back to home
+        <span class="cta-dot" aria-hidden="true"></span>
+      </a>
+
+    </div>
+
+  </main>
+
+  <script>
+  (function () {
+    "use strict";
+    // If we arrived straight from the form, confirm the exact address back to
+    // them — it is the cheapest way to catch a typo while they still care.
+    try {
+      var email = sessionStorage.getItem("gymai-waitlist-email");
+      if (email) {
+        document.getElementById("sub").textContent =
+          "We've saved your spot for " + email + ". You'll hear from us the moment GymAI is ready.";
+        sessionStorage.removeItem("gymai-waitlist-email");
+      }
+    } catch (e) {}
+  })();
+  </script>
+
+</body>
+</html>
