@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>GymAI — Careers</title>
+<meta name="description" content="Open roles at GymAI. We're making every workout machine smart — come build it with us.">
+<meta name="theme-color" content="#000000">
+
+<meta property="og:title" content="GymAI — Careers">
+<meta property="og:description" content="Open roles at GymAI. Making every workout machine smart.">
+<meta property="og:type" content="website">
+
+<link rel="icon" href="Assets/gymai_logo_transparent_v02_8.17.2026.PNG">
+<link rel="preload" href="Fonts/Switzer-Light.ttf" as="font" type="font/ttf" crossorigin>
+<link rel="preload" href="Fonts/Switzer-Semibold.ttf" as="font" type="font/ttf" crossorigin>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body class="careers">
+
+  <!-- ======================================================================
+       HERO — the whole viewport, black, one word.
+       ====================================================================== -->
+  <header class="c-hero">
+
+    <img class="squares squares-tl" src="Assets/squares.png" alt="" aria-hidden="true">
+    <img class="squares squares-br" src="Assets/squares.png" alt="" aria-hidden="true">
+
+    <div class="c-wrap c-hero-inner">
+      <p class="c-eyebrow">GymAI — Careers</p>
+
+      <h1 class="c-title">Careers</h1>
+
+      <p class="c-lede">
+        We're making every workout machine smart. It's a small team, an
+        unreasonable amount of ambition, and a product people touch every
+        single day. If that sounds like your kind of problem, we'd like to
+        meet you.
+      </p>
+
+      <div class="c-hero-actions">
+        <a class="c-pill c-pill-solid" href="#roles">
+          <span>See open roles</span>
+          <span class="cta-dot" aria-hidden="true"></span>
+        </a>
+        <a class="c-pill c-pill-ghost" href="#apply">General application</a>
+      </div>
+    </div>
+
+  </header>
+
+  <main>
+
+    <!-- ====================================================================
+         HOW WE WORK
+         ==================================================================== -->
+    <section class="c-section">
+      <div class="c-wrap">
+
+        <div class="c-section-head">
+          <h2 class="c-section-title">How we <strong>work</strong>.</h2>
+        </div>
+
+        <div class="c-grid">
+          <div>
+            <h3 class="c-card-title">Small team, real ownership</h3>
+            <p class="c-card-body">
+              You will own a surface end to end, not a ticket queue. Everyone
+              here ships to production in their first week.
+            </p>
+          </div>
+          <div>
+            <h3 class="c-card-title">Built in the gym</h3>
+            <p class="c-card-body">
+              We test on real machines with real members. The floor tells us
+              what to build next, not a roadmap document.
+            </p>
+          </div>
+          <div>
+            <h3 class="c-card-title">Fast, on purpose</h3>
+            <p class="c-card-body">
+              Short cycles, honest feedback, no ceremony. We would rather ship
+              something rough on Friday than perfect it in a slide deck.
+            </p>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         OPEN ROLES — rendered from GYMAI_CAREERS_ROLES in config.js.
+         ==================================================================== -->
+    <section class="c-section" id="roles">
+      <div class="c-wrap">
+
+        <div class="c-section-head">
+          <h2 class="c-section-title">Open <strong>roles</strong>.</h2>
+          <p class="c-section-note" id="roles-count"></p>
+        </div>
+
+        <ol class="role-list" id="role-list" hidden></ol>
+
+        <p class="roles-empty" id="roles-empty" hidden>
+          No roles are posted right now — but we're always early enough that the
+          right person creates their own. Tell us what you'd build
+          <a href="#apply">below</a>.
+        </p>
+
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         APPLY — one of two things, decided by config.js:
+           · a Google Form, embedded, if GYMAI_CAREERS_FORM_EMBED is set
+           · otherwise our own form, posting to the Google Sheet endpoint
+         ==================================================================== -->
+    <section class="c-section" id="apply">
+      <div class="c-wrap">
+
+        <div class="c-section-head">
+          <h2 class="c-section-title">Apply <strong>here</strong>.</h2>
+          <p class="c-section-note">Takes about two minutes.</p>
+        </div>
+
+        <div class="c-apply-layout">
+
+          <aside class="c-apply-aside">
+            <p>
+              One form for every role. Pick the one you're after — or
+              <em>General</em> if none of them fit and you think we're missing a
+              hire.
+            </p>
+            <p>
+              A link to your work says more than a cover letter: GitHub, a
+              portfolio, LinkedIn, a demo video, anything you're proud of.
+            </p>
+            <p id="apply-contact"></p>
+          </aside>
+
+          <div>
+            <!-- Google Form goes here when one is configured. -->
+            <div class="c-embed" id="apply-embed" hidden></div>
+
+            <!-- novalidate: browser bubbles are suppressed so every message
+                 lands in the one .c-status line. -->
+            <form class="c-form" id="apply-form" novalidate hidden>
+
+              <!-- Bot trap: off-screen, never focusable, discarded server-side
+                   if it comes back filled. -->
+              <input class="hp" type="text" name="company" tabindex="-1" autocomplete="off" aria-hidden="true">
+
+              <div>
+                <label class="c-label" for="name">Name</label>
+                <input class="c-input" id="name" name="name" type="text"
+                       autocomplete="name" placeholder="Alex Rivera" required>
+              </div>
+
+              <div>
+                <label class="c-label" for="email">Email</label>
+                <input class="c-input" id="email" name="email" type="email"
+                       inputmode="email" autocomplete="email" autocapitalize="off"
+                       spellcheck="false" placeholder="you@email.com" required>
+              </div>
+
+              <div class="c-field-row">
+                <label class="c-label" for="role">Role</label>
+                <select class="c-select" id="role" name="role"></select>
+              </div>
+
+              <div class="c-field-row">
+                <label class="c-label" for="link">Link to your work</label>
+                <input class="c-input" id="link" name="link" type="url"
+                       inputmode="url" autocapitalize="off" spellcheck="false"
+                       placeholder="https://github.com/you">
+              </div>
+
+              <div class="c-field-row">
+                <label class="c-label" for="note">Why GymAI?</label>
+                <textarea class="c-textarea" id="note" name="note"
+                          placeholder="A few lines. What you'd want to build here, or what you've built before."></textarea>
+              </div>
+
+              <div class="c-actions">
+                <button class="c-pill c-pill-solid" id="apply-submit" type="submit">
+                  <span id="apply-submit-label">Send application</span>
+                  <span class="cta-dot" aria-hidden="true"></span>
+                </button>
+              </div>
+
+              <!-- aria-live so screen readers hear results as they arrive. -->
+              <p class="c-status" id="apply-status" role="status" aria-live="polite"></p>
+            </form>
+
+            <!-- Swapped in for the form once a submission lands. -->
+            <div id="apply-done" hidden>
+              <div class="tick" aria-hidden="true" style="margin-left:0">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                     stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M5 12.5l4.5 4.5L19 6.5"></path>
+                </svg>
+              </div>
+              <h3 class="c-section-title" style="font-size:clamp(24px,3.4vw,34px)">
+                <strong>Got it.</strong>
+              </h3>
+              <p class="c-lede" style="margin-top:12px">
+                Your application is in. We read every one, and you'll hear back
+                from a person — not an autoresponder.
+              </p>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <footer class="c-wrap c-foot">
+      <img class="c-foot-logo" src="Assets/gymai_logo_transparent_v02_8.17.2026.PNG" alt="GymAI">
+      <span>Making every workout machine smart.</span>
+      <span><a href="index.html">Home</a> &nbsp; <a href="waitlist.html">Waitlist</a></span>
+    </footer>
+
+  </main>
+
+  <script src="config.js"></script>
+  <script src="nav.js"></script>
+  <script>
+  (function () {
+    "use strict";
+
+    var ROLES = window.GYMAI_CAREERS_ROLES || [];
+    var ENDPOINT = (window.GYMAI_CAREERS_ENDPOINT || "").trim();
+    var EMBED = (window.GYMAI_CAREERS_FORM_EMBED || "").trim();
+    var CONTACT = (window.GYMAI_CAREERS_EMAIL || "").trim();
+
+    /* ------------------------------------------------------------------
+       Open roles
+       ------------------------------------------------------------------ */
+
+    var list = document.getElementById("role-list");
+    var empty = document.getElementById("roles-empty");
+    var count = document.getElementById("roles-count");
+
+    // Anything the page prints came from config.js, but it is still text being
+    // turned into markup — escape it so a stray & or < cannot break the row.
+    function esc(value) {
+      return String(value == null ? "" : value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    var ARROW =
+      '<span class="role-arrow" aria-hidden="true">' +
+        '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" ' +
+             'stroke-linecap="round" stroke-linejoin="round">' +
+          '<path d="M3 8h10M8.5 3.5L13 8l-4.5 4.5"/>' +
+        "</svg>" +
+      "</span>";
+
+    if (ROLES.length) {
+      list.innerHTML = ROLES.map(function (role) {
+        // A role with its own link (Ashby, Notion, a Google Form, a mailto)
+        // goes there; one without falls through to the form on this page.
+        var href = (role.link || "").trim();
+        var external = /^https?:/i.test(href);
+        var target = external ? ' target="_blank" rel="noopener"' : "";
+        // No link of its own: fall through to the form on this page, carrying
+        // the title so the Role dropdown can be set to it on the way down.
+        var carry = href ? "" : ' data-role="' + esc(role.title) + '"';
+        if (!href) href = "#apply";
+
+        var meta = [role.team, role.location, role.type]
+          .filter(Boolean)
+          .map(function (bit) { return "<span>" + esc(bit) + "</span>"; })
+          .join("");
+
+        return (
+          '<li class="role">' +
+            '<a class="role-link" href="' + esc(href) + '"' + target + carry + ">" +
+              "<div>" +
+                '<h3 class="role-title">' + esc(role.title) + "</h3>" +
+                (meta ? '<p class="role-meta">' + meta + "</p>" : "") +
+              "</div>" +
+              ARROW +
+            "</a>" +
+          "</li>"
+        );
+      }).join("");
+
+      list.hidden = false;
+      count.textContent = ROLES.length + (ROLES.length === 1 ? " position" : " positions");
+    } else {
+      empty.hidden = false;
+    }
+
+    /* ------------------------------------------------------------------
+       Apply — a Google Form if one is configured, otherwise our own.
+       ------------------------------------------------------------------ */
+
+    var embed = document.getElementById("apply-embed");
+    var form = document.getElementById("apply-form");
+    var done = document.getElementById("apply-done");
+    var status = document.getElementById("apply-status");
+    var button = document.getElementById("apply-submit");
+    var label = document.getElementById("apply-submit-label");
+    var select = document.getElementById("role");
+
+    if (CONTACT) {
+      document.getElementById("apply-contact").innerHTML =
+        'Prefer email? <a href="mailto:' + esc(CONTACT) + '">' + esc(CONTACT) + "</a>.";
+    }
+
+    if (EMBED) {
+      // Google's own share URL ends in /viewform; ?embedded=true drops its
+      // outer chrome so only the form itself renders.
+      var src = EMBED.indexOf("embedded=true") === -1
+        ? EMBED + (EMBED.indexOf("?") === -1 ? "?" : "&") + "embedded=true"
+        : EMBED;
+
+      embed.innerHTML =
+        '<iframe src="' + esc(src) + '" title="GymAI application form" ' +
+                'loading="lazy">Loading…</iframe>';
+      embed.hidden = false;
+      return;
+    }
+
+    form.hidden = false;
+
+    // Role options mirror the posted roles, so the sheet column matches the
+    // listings without anyone maintaining two lists.
+    var options = ROLES.map(function (role) { return esc(role.title); });
+    options.push("General / future openings");
+    select.innerHTML = options.map(function (title) {
+      return '<option value="' + title + '">' + title + "</option>";
+    }).join("");
+
+    // A role row with no link of its own scrolls down to this form — set the
+    // dropdown to it on the way, so nobody has to pick it twice.
+    list.addEventListener("click", function (event) {
+      var link = event.target.closest("[data-role]");
+      if (!link) return;
+
+      var wanted = link.getAttribute("data-role");
+      for (var i = 0; i < select.options.length; i++) {
+        if (select.options[i].value === wanted) {
+          select.selectedIndex = i;
+          return;
+        }
+      }
+    });
+
+    function say(message, state) {
+      status.textContent = message;
+      if (state) {
+        status.setAttribute("data-state", state);
+      } else {
+        status.removeAttribute("data-state");
+      }
+    }
+
+    function busy(isBusy) {
+      button.disabled = isBusy;
+      label.textContent = isBusy ? "Sending" : "Send application";
+    }
+
+    // Deliberately loose — the only job is catching a missing @ before a round
+    // trip. Real validation is us replying to the address.
+    function looksLikeEmail(value) {
+      return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value);
+    }
+
+    form.addEventListener("submit", function (event) {
+      event.preventDefault();
+
+      var fields = form.elements;
+      var name = fields.namedItem("name").value.trim();
+      var email = fields.namedItem("email").value.trim();
+      var link = fields.namedItem("link").value.trim();
+
+      if (!name) {
+        say("What should we call you?", "error");
+        fields.namedItem("name").focus();
+        return;
+      }
+
+      if (!looksLikeEmail(email)) {
+        say("That email doesn't look right — mind checking it?", "error");
+        fields.namedItem("email").focus();
+        return;
+      }
+
+      if (!ENDPOINT) {
+        say("Applications aren't connected yet. Add your endpoint to config.js.", "error");
+        return;
+      }
+
+      busy(true);
+      say("");
+
+      // URLSearchParams keeps this a "simple" request, so the browser sends it
+      // without a CORS preflight — Apps Script cannot answer an OPTIONS call.
+      var body = new URLSearchParams({
+        name: name,
+        email: email,
+        role: select.value,
+        link: link,
+        note: fields.namedItem("note").value.trim(),
+        company: fields.namedItem("company").value,
+        source: "careers.html",
+        ref: document.referrer || ""
+      });
+
+      fetch(ENDPOINT, { method: "POST", body: body })
+        .then(function (response) { return response.json(); })
+        .then(function (data) {
+          if (data && data.result === "success") {
+            succeed();
+          } else {
+            throw new Error((data && data.message) || "Unexpected response");
+          }
+        })
+        .catch(function () {
+          // The response could not be read — usually a CORS quirk on the
+          // redirect Apps Script issues, not a failure to save. Re-send in
+          // opaque mode so the row is definitely written, then continue.
+          return fetch(ENDPOINT, { method: "POST", mode: "no-cors", body: body })
+            .then(succeed)
+            .catch(function () {
+              busy(false);
+              say("Something went wrong on our end. Please try again.", "error");
+            });
+        });
+
+      function succeed() {
+        form.hidden = true;
+        done.hidden = false;
+        done.setAttribute("tabindex", "-1");
+        done.focus({ preventScroll: true });
+      }
+    });
+  })();
+  </script>
+
+</body>
+</html>

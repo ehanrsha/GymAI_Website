@@ -59,6 +59,13 @@
   box-sizing: border-box;
 }
 
+/* An author `display` beats the UA stylesheet's `[hidden] { display: none }`,
+   so anything given a display value here — .c-form, for one — would ignore the
+   hidden attribute the pages toggle it with. Restate it, louder. */
+[hidden] {
+  display: none !important;
+}
+
 html,
 body {
   height: 100%;
@@ -543,4 +550,771 @@ body {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* ==========================================================================
+   Navigation — hamburger + drop-down panel (nav.js)
+
+   Three lines pinned to the top-right of every page. Pressing them drops a
+   black panel down over the top of the viewport. The panel is ink-black on
+   every page, so the bars flip to white while it is open; otherwise they use
+   `--nav-ink`, which each page sets for the background it sits on.
+   ========================================================================== */
+
+:root {
+  --nav-ink: var(--ink);
+  --nav-gutter: clamp(16px, 3.2vw, 34px);
+}
+
+/* Freeze the page behind an open panel so a scroll gesture on the menu does
+   not run the content underneath it. */
+html.nav-locked,
+html.nav-locked body {
+  overflow: hidden;
+}
+
+.nav {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 90;
+  /* The bar is only the strip the toggle occupies — everything below it stays
+     clickable until the panel is actually open. */
+  height: 0;
+  pointer-events: none;
+}
+
+.nav > * {
+  pointer-events: auto;
+}
+
+/* --- The three lines ----------------------------------------------------- */
+
+.nav-toggle {
+  position: absolute;
+  top: var(--nav-gutter);
+  right: var(--nav-gutter);
+  z-index: 2; /* above the panel, so it becomes the close button */
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--nav-ink);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.nav[data-open] .nav-toggle {
+  color: var(--on-ink);
+}
+
+.nav-bars {
+  position: relative;
+  display: block;
+  width: 22px;
+  height: 14px;
+}
+
+.nav-bars i {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 1.5px;
+  border-radius: 2px;
+  background: currentColor;
+  transition: transform 0.28s cubic-bezier(0.2, 0.7, 0.2, 1),
+              opacity 0.16s ease;
+}
+
+.nav-bars i:nth-child(1) { top: 0; }
+.nav-bars i:nth-child(2) { top: 50%; transform: translateY(-50%); }
+.nav-bars i:nth-child(3) { bottom: 0; }
+
+/* Open: the outer two cross, the middle one drops out. */
+.nav[data-open] .nav-bars i:nth-child(1) {
+  transform: translateY(6.25px) rotate(45deg);
+}
+
+.nav[data-open] .nav-bars i:nth-child(2) {
+  opacity: 0;
+}
+
+.nav[data-open] .nav-bars i:nth-child(3) {
+  transform: translateY(-6.25px) rotate(-45deg);
+}
+
+.nav-toggle:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+/* --- The panel ----------------------------------------------------------- */
+
+.nav-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background: rgba(0, 0, 0, 0.42);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.nav[data-open] .nav-scrim {
+  opacity: 1;
+}
+
+.nav-panel {
+  position: relative;
+  z-index: 1;
+  padding: calc(var(--nav-gutter) + 46px) 0 clamp(24px, 4vh, 40px);
+  background: var(--ink);
+  color: var(--on-ink);
+  border-radius: 0 0 clamp(18px, 2.4vw, 28px) clamp(18px, 2.4vw, 28px);
+  /* Follows the rounded corners, and is the only thing separating the panel
+     from the page on Careers, where both are black. */
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.16);
+  transform: translateY(-101%);
+  transition: transform 0.34s cubic-bezier(0.22, 0.68, 0.2, 1);
+}
+
+.nav[data-open] .nav-panel {
+  transform: translateY(0);
+}
+
+.nav-links {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: clamp(2px, 0.8vh, 8px);
+  width: 100%;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 0 clamp(20px, 5vw, 48px);
+  list-style: none;
+}
+
+.nav-item {
+  /* Each line follows the panel down a beat behind the one above it. */
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  transition-delay: calc(var(--i) * 45ms + 60ms);
+}
+
+.nav[data-open] .nav-item {
+  opacity: 1;
+  transform: none;
+}
+
+.nav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  padding: clamp(6px, 1vh, 10px) 0;
+  color: var(--on-ink);
+  font-size: clamp(30px, 6.2vw, 52px);
+  font-weight: 300;
+  letter-spacing: -0.025em;
+  line-height: 1.1;
+  text-decoration: none;
+}
+
+.nav-link-label {
+  position: relative;
+}
+
+/* Hairline that draws itself in on hover — the whole hover treatment. */
+.nav-link-label::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -0.06em;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.28s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.nav-link:hover .nav-link-label::after,
+.nav-link:focus-visible .nav-link-label::after,
+.nav-link[aria-current="page"] .nav-link-label::after {
+  transform: scaleX(1);
+}
+
+.nav-link[aria-current="page"] {
+  opacity: 0.55;
+}
+
+/* The waitlist entry: same pill as the landing-page CTA, inverted. */
+.nav-link-pill {
+  margin-top: clamp(12px, 2.2vh, 22px);
+  padding: 0 12px 0 22px;
+  height: 48px;
+  border-radius: 45px;
+  background: var(--on-ink);
+  color: var(--ink);
+  font-size: 16px;
+  letter-spacing: 0;
+}
+
+.nav-link-pill .cta-dot {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  background: var(--ink);
+}
+
+.nav-link-pill .nav-link-label::after {
+  display: none;
+}
+
+.nav-link:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 4px;
+}
+
+.nav-foot {
+  width: 100%;
+  max-width: 1120px;
+  margin: clamp(22px, 4vh, 40px) auto 0;
+  padding: clamp(14px, 2vh, 20px) clamp(20px, 5vw, 48px) 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.16);
+  font-size: 13px;
+  line-height: 1.4;
+  opacity: 0.5;
+}
+
+@media (min-width: 768px) {
+  .nav-panel {
+    padding-top: calc(var(--nav-gutter) + 34px);
+  }
+
+}
+
+/* ==========================================================================
+   Careers (careers.html)
+
+   The one page on the site that inverts the palette: ink black ground, white
+   type, hairline rules. Everything else is carried over — Switzer, the pill
+   with the dot, the corner grid motif (inverted so its black lines read as
+   white against the black).
+
+   Layout is a flow document rather than the landing page's scaled composition
+   — it has to hold an unknown number of roles and a form.
+   ========================================================================== */
+
+body.careers {
+  height: auto;
+  background: var(--ink);
+  color: var(--on-ink);
+
+  --nav-ink: var(--on-ink);
+  --hair: rgba(255, 255, 255, 0.16);
+  --muted: rgba(255, 255, 255, 0.62);
+}
+
+/* Shared measure. Everything on the page lines up against this column. */
+.c-wrap {
+  width: 100%;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 0 clamp(20px, 5vw, 48px);
+}
+
+/* --- Hero ---------------------------------------------------------------- */
+
+.c-hero {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 100vh;
+  min-height: 100svh;
+  overflow: hidden;
+  padding: clamp(96px, 16vh, 160px) 0 clamp(48px, 8vh, 90px);
+}
+
+/* The corner grids again. squares.png is black line art, so it is inverted to
+   white and dropped back to a whisper — present, never competing with the
+   wordmark. */
+.c-hero .squares {
+  width: clamp(170px, 30vmin, 420px);
+  height: clamp(170px, 30vmin, 420px);
+  filter: invert(1);
+  opacity: 0.14;
+}
+
+.c-hero .squares-tl {
+  top: clamp(-46px, -4vmin, -20px);
+  left: clamp(-34px, -3vmin, -14px);
+  transform: rotate(90deg);
+}
+
+.c-hero .squares-br {
+  right: clamp(-18px, -1.5vmin, -6px);
+  bottom: clamp(-20px, -1.7vmin, -7px);
+}
+
+.c-hero-inner {
+  position: relative;
+  z-index: 1;
+}
+
+.c-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 clamp(18px, 3vh, 30px);
+  font-size: 13px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.c-eyebrow::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--on-ink);
+}
+
+/* The word itself. Scales from the viewport so it always fills the measure. */
+.c-title {
+  margin: 0;
+  font-size: clamp(64px, 16.5vw, 200px);
+  font-weight: 600;
+  letter-spacing: -0.045em;
+  line-height: 0.88;
+}
+
+.c-lede {
+  max-width: 46ch;
+  margin: clamp(22px, 4vh, 36px) 0 0;
+  font-size: clamp(16px, 1.9vw, 21px);
+  line-height: 1.5;
+  color: var(--muted);
+  text-wrap: pretty;
+}
+
+.c-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: clamp(28px, 5vh, 44px);
+}
+
+/* --- Pills (on black) ---------------------------------------------------- */
+
+.c-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  height: 48px;
+  padding: 0 14px 0 22px;
+  border: 1px solid transparent;
+  border-radius: 45px;
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 300;
+  line-height: 1;
+  text-decoration: none;
+  cursor: pointer;
+  transition: opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+}
+
+/* Filled: white on black — the inverse of the landing-page CTA. */
+.c-pill-solid {
+  background: var(--on-ink);
+  color: var(--ink);
+}
+
+.c-pill-solid .cta-dot {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  background: var(--ink);
+}
+
+.c-pill-solid:hover {
+  opacity: 0.86;
+}
+
+/* Outline: hairline border, fills faintly on hover. */
+.c-pill-ghost {
+  background: transparent;
+  border-color: var(--hair);
+  color: var(--on-ink);
+}
+
+.c-pill-ghost:hover {
+  background: rgba(255, 255, 255, 0.07);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.c-pill:focus-visible {
+  outline: 2px solid var(--on-ink);
+  outline-offset: 3px;
+}
+
+/* --- Section scaffolding ------------------------------------------------- */
+
+.c-section {
+  padding: clamp(56px, 10vh, 110px) 0;
+  border-top: 1px solid var(--hair);
+}
+
+.c-section-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: clamp(28px, 5vh, 48px);
+}
+
+.c-section-title {
+  margin: 0;
+  font-size: clamp(28px, 4.6vw, 46px);
+  font-weight: 300;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+}
+
+.c-section-title strong {
+  font-weight: 600;
+}
+
+.c-section-note {
+  margin: 0;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+/* --- Values row ---------------------------------------------------------- */
+
+.c-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: clamp(24px, 4vw, 48px);
+}
+
+.c-card-title {
+  margin: 0 0 10px;
+  padding-top: 16px;
+  border-top: 1px solid var(--hair);
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.c-card-body {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--muted);
+  text-wrap: pretty;
+}
+
+/* --- Open roles ---------------------------------------------------------- */
+
+.role-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--hair);
+}
+
+.role {
+  border-bottom: 1px solid var(--hair);
+}
+
+/* The whole row is the link. Grid rather than flex so the meta column keeps
+   its own alignment when the title wraps. */
+.role-link {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: clamp(12px, 3vw, 40px);
+  padding: clamp(20px, 3.4vh, 30px) clamp(8px, 1.6vw, 18px);
+  margin: 0 clamp(-8px, -1.6vw, -18px);
+  color: var(--on-ink);
+  text-decoration: none;
+  transition: background-color 0.22s ease;
+}
+
+.role-link:hover,
+.role-link:focus-visible {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.role-link:focus-visible {
+  outline: 1px solid rgba(255, 255, 255, 0.45);
+  outline-offset: -1px;
+}
+
+.role-title {
+  margin: 0;
+  font-size: clamp(20px, 2.9vw, 30px);
+  font-weight: 300;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.role-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 0 0;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+/* Middot between each pair of meta values, never trailing. */
+.role-meta span + span::before {
+  content: "·";
+  margin-right: 8px;
+}
+
+.role-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 42px;
+  height: 42px;
+  border: 1px solid var(--hair);
+  border-radius: 50%;
+  transition: background-color 0.22s ease, border-color 0.22s ease,
+              transform 0.22s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.role-arrow svg {
+  width: 15px;
+  height: 15px;
+}
+
+.role-link:hover .role-arrow,
+.role-link:focus-visible .role-arrow {
+  background: var(--on-ink);
+  border-color: var(--on-ink);
+  color: var(--ink);
+  transform: translateX(3px);
+}
+
+/* Shown by careers.html when no roles are configured. */
+.roles-empty {
+  margin: 0;
+  padding: clamp(28px, 5vh, 48px) 0;
+  border-bottom: 1px solid var(--hair);
+  font-size: clamp(16px, 2vw, 19px);
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+/* --- Apply --------------------------------------------------------------- */
+
+.c-apply-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: clamp(28px, 5vw, 64px);
+}
+
+@media (min-width: 900px) {
+  .c-apply-layout {
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1fr);
+  }
+}
+
+.c-apply-aside p {
+  margin: 0 0 14px;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--muted);
+  max-width: 38ch;
+}
+
+.c-apply-aside a {
+  color: var(--on-ink);
+}
+
+/* Fields, inverted from the waitlist form. */
+.c-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.c-field-row {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 639px) {
+  .c-form {
+    grid-template-columns: 1fr;
+  }
+}
+
+.c-label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+
+.c-input,
+.c-select,
+.c-textarea {
+  width: 100%;
+  padding: 0 18px;
+  height: 50px;
+  border: 1px solid var(--hair);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--on-ink);
+  font-family: inherit;
+  font-size: 16px; /* 16px or larger stops iOS Safari zooming on focus */
+  font-weight: 300;
+  line-height: 1;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.c-textarea {
+  height: auto;
+  min-height: 130px;
+  padding: 15px 18px;
+  line-height: 1.5;
+  resize: vertical;
+}
+
+.c-input::placeholder,
+.c-textarea::placeholder {
+  color: rgba(255, 255, 255, 0.34);
+}
+
+.c-input:focus,
+.c-select:focus,
+.c-textarea:focus {
+  outline: none;
+  border-color: rgba(255, 255, 255, 0.75);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+/* The native arrow is drawn in the OS colour, which on a dark field reads as
+   a smudge — hide it and draw our own chevron. */
+.c-select {
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: 44px;
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8' fill='none' stroke='%23ffffff' stroke-width='1.4'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 18px center;
+  background-size: 12px 8px;
+  cursor: pointer;
+}
+
+/* The dropdown itself is painted by the OS, so it needs explicit colours. */
+.c-select option {
+  background: #111111;
+  color: #ffffff;
+}
+
+.c-actions {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+  margin-top: 4px;
+}
+
+.c-submit:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+
+.c-status {
+  grid-column: 1 / -1;
+  min-height: 1.4em;
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.4;
+  color: var(--muted);
+}
+
+.c-status:empty {
+  visibility: hidden;
+}
+
+.c-status[data-state="error"] {
+  color: #ff9a7b;
+}
+
+.c-status[data-state="success"] {
+  color: var(--on-ink);
+}
+
+/* Google Form embed. Forms render on white, so it sits in a white card that
+   looks deliberate rather than like a hole in the page. */
+.c-embed {
+  overflow: hidden;
+  border-radius: 16px;
+  background: #ffffff;
+}
+
+.c-embed iframe {
+  display: block;
+  width: 100%;
+  height: clamp(720px, 88vh, 1200px);
+  border: 0;
+}
+
+/* --- Footer -------------------------------------------------------------- */
+
+.c-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: clamp(26px, 4vh, 40px) 0;
+  border-top: 1px solid var(--hair);
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.c-foot a {
+  color: var(--on-ink);
+  text-decoration: none;
+  border-bottom: 1px solid var(--hair);
+  padding-bottom: 2px;
+}
+
+.c-foot a:hover {
+  border-bottom-color: var(--on-ink);
+}
+
+/* The mark is black line art on transparent, so it inverts to white here
+   rather than needing a second asset. */
+.c-foot-logo {
+  width: 46px;
+  height: 46px;
+  object-fit: contain;
+  filter: invert(1);
+  opacity: 0.75;
+}
+
+/* The shared thank-you tick is ink-on-white; on this page it inverts. */
+.careers .tick {
+  background: var(--on-ink);
+  color: var(--ink);
 }
