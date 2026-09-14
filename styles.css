@@ -91,6 +91,15 @@ body {
   --s: min(100vw / 393, 100svh / 700);
   --pw: calc(356 * var(--s)); /* phone width */
 
+  /* Offset from the CTA's resting spot to where it waits before dropping:
+     the top centre of the stage. Expressed as the distance it has to travel,
+     because the animation moves it from here back to 0,0 — the pill keeps its
+     real layout position, so nothing else has to move for it.
+       x  left:15s        -> horizontally centred
+       y  bottom:20s      -> top:40s, i.e. 40s - (100svh - 20s - 42s) */
+  --cta-lift-x: calc((100vw - 235 * var(--s)) / 2 - 15 * var(--s));
+  --cta-lift-y: calc(102 * var(--s) - 100svh);
+
   position: relative;
   width: 100%;
   height: 100vh;
@@ -215,6 +224,96 @@ body {
   outline-offset: calc(3 * var(--s));
 }
 
+/* The pill opens the page parked at the top centre, holds the eye there for
+   three and a half seconds, then drops into the corner it lives in.
+
+   `both` is what makes the wait work: the 0% keyframe is held through the
+   delay, so the pill sits at the top without needing a second rule to put it
+   there — and the moment the animation ends it is back at its real layout
+   position, transform: none, nothing left over.
+
+   Timing is linear on purpose. The acceleration is written into the spacing of
+   the stops instead, so velocity stays continuous through the fall and only
+   snaps where it is meant to: the bounces.
+
+   The motion blur is the vertical stretch and the blur together. A CSS blur is
+   round, which on its own would read as "out of focus" rather than "moving";
+   scaling the pill along the direction of travel at the same time is what
+   turns it into smear. Both peak mid-fall and are gone before it lands. */
+.cta {
+  animation: cta-drop 1.35s linear 3.5s both;
+}
+
+@keyframes cta-drop {
+  /* Parked, top centre. */
+  0% {
+    transform: translate(var(--cta-lift-x), var(--cta-lift-y));
+    filter: blur(0px);
+  }
+
+  /* A breath of wind-up — rises and compresses before it lets go. */
+  9% {
+    transform: translate(var(--cta-lift-x), calc(var(--cta-lift-y) * 1.04)) scaleY(0.94);
+    filter: blur(0px);
+  }
+
+  /* Falling, and picking up speed. */
+  20% {
+    transform: translate(calc(var(--cta-lift-x) * 0.94), calc(var(--cta-lift-y) * 0.93)) scaleY(1.1);
+    filter: blur(3px);
+  }
+
+  32% {
+    transform: translate(calc(var(--cta-lift-x) * 0.72), calc(var(--cta-lift-y) * 0.64)) scaleY(1.18);
+    filter: blur(6px);
+  }
+
+  44% {
+    transform: translate(calc(var(--cta-lift-x) * 0.44), calc(var(--cta-lift-y) * 0.35)) scaleY(1.18);
+    filter: blur(6px);
+  }
+
+  /* Slowing into the landing. */
+  55% {
+    transform: translate(calc(var(--cta-lift-x) * 0.17), calc(var(--cta-lift-y) * 0.12)) scaleY(1.1);
+    filter: blur(3.5px);
+  }
+
+  /* Impact: just past its mark, squashed. */
+  64% {
+    transform: translate(0, calc(var(--cta-lift-y) * -0.02)) scaleY(0.9);
+    filter: blur(0.8px);
+  }
+
+  /* Springs back, twice, each smaller than the last. */
+  73% {
+    transform: translate(0, calc(var(--cta-lift-y) * 0.012)) scaleY(1.05);
+    filter: blur(0px);
+  }
+
+  82% {
+    transform: translate(0, calc(var(--cta-lift-y) * -0.005)) scaleY(0.98);
+  }
+
+  90% {
+    transform: translate(0, calc(var(--cta-lift-y) * 0.002)) scaleY(1.01);
+  }
+
+  100% {
+    transform: translate(0, 0) scaleY(1);
+    filter: blur(0px);
+  }
+}
+
+/* Anyone who has asked for less motion gets the pill where it belongs, at
+   once. The blanket rule further down only shortens durations, which would
+   still leave them staring at a pill parked at the top for three seconds. */
+@media (prefers-reduced-motion: reduce) {
+  .cta {
+    animation: none;
+  }
+}
+
 /* Corner grid motifs — squares.png (1081 square, transparent, black lines).
    Anchored to the corners so they stay tucked into them at any viewport size,
    bleeding off-canvas by the same amount as the design. First in the DOM, so
@@ -256,6 +355,11 @@ body {
     --s: min(100svh / 1024, 100vw / 1000);
     /* 916 tall at the PNG's 1319:2748 ratio => 439.7 wide (Figma: 439.06) */
     --pw: calc(439.7 * var(--s));
+
+    /* Same trip, against the desktop pill (296 x 42, left 49, bottom 64) and
+       a slightly deeper top margin: 44s - (100svh - 64s - 42s). */
+    --cta-lift-x: calc((100vw - 296 * var(--s)) / 2 - 49 * var(--s));
+    --cta-lift-y: calc(150 * var(--s) - 100svh);
   }
 
   /* Logo — 288 square, centered, top 119 */
