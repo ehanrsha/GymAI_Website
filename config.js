@@ -47,7 +47,7 @@ window.GYMAI_CAREERS_ROLES = [
   {
     title: "CMO — Chief of Marketing & Outreach",
     team: "Growth",
-    location: "Remote",
+    location: "Remote/In-Person",
     type: "Founding",
     blurb: "You own growth. That means getting GymAI in front of real people: " +
            "partnerships with gyms and studios, deals with influencers and " +
@@ -61,11 +61,11 @@ window.GYMAI_CAREERS_ROLES = [
   {
     title: "Founding Engineer / CTO",
     team: "Engineering",
-    location: "Remote",
+    location: "Remote/In-Person",
     type: "Founding",
     blurb: "You own the tech stack and the app. React Native and Expo on the " +
            "front, the data and analytics layer behind it, and every feature " +
-           "in between — shipped, not prototyped. You will make the calls on " +
+           "in between — shipped, not prototyped. You will make the calls with the CEO on " +
            "architecture, tooling and what gets built next, and you will be in " +
            "the code every day. The bar is not 'it works': it is a product " +
            "people open without being asked to."
@@ -73,19 +73,19 @@ window.GYMAI_CAREERS_ROLES = [
   {
     title: "Computer Vision Engineer",
     team: "Engineering",
-    location: "Remote",
+    location: "Remote/In-Person",
     type: "Full-time",
     blurb: "You own what the camera sees. Reading a machine, a plate stack and " +
            "a rep accurately from a phone camera — in bad gym lighting, at odd " +
            "angles, on a cheap device — is the hardest problem we have, and it " +
            "is yours. Accuracy is the priority: the ML and CV models behind " +
            "it, and then how that reading becomes data the app can show " +
-           "someone mid-set and trust afterwards."
+           "someone mid-set and trust afterwards. This is our major feature, and it will be make or break for our app."
   },
   {
     title: "Graphic Designer",
     team: "Design",
-    location: "Remote",
+    location: "Remote/In-Person",
     type: "Full-time / Contract",
     blurb: "You make everything look like GymAI. Advertising, social, brand " +
            "work and a real share of the app's own surfaces — this is a major " +
@@ -106,7 +106,7 @@ window.GYMAI_CAREERS_ROLES = [
    to send an application and dropping it.
    -------------------------------------------------------------------------- */
 
-window.GYMAI_CAREERS_ENDPOINT = "";
+window.GYMAI_CAREERS_ENDPOINT = "https://script.google.com/macros/s/AKfycbyxIgGzSIJlvGyqxXXeDuxQ7z3vkFUMO6w4qfcvVO2-i__yPvh1BxBYQNOMsKx47ePywQ/exec";
 
 /* --------------------------------------------------------------------------
    3. GOOGLE FORM INSTEAD (optional)
