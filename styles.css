@@ -1332,6 +1332,211 @@ body.careers {
   color: #ffffff;
 }
 
+/* --- Role description ----------------------------------------------------
+   Sits directly under the Role dropdown and matches the fields around it,
+   so it reads as part of the form rather than a callout bolted beside it.
+   -------------------------------------------------------------------------- */
+
+.role-desc {
+  position: relative;
+  padding: 16px 18px 18px;
+  border: 1px solid var(--hair);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.role-desc-title {
+  margin: 0 0 8px;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--on-ink);
+}
+
+.role-desc-body {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.65;
+  color: var(--muted);
+}
+
+/* The rainbow lives on its own overlay rather than on the box's border, so
+   the resting hairline never moves and nothing reflows when it fires. A
+   gradient clipped to a 1px ring by two masks that cancel each other out in
+   the middle — the same trick as a gradient border, minus the second element. */
+.role-desc-sweep {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  opacity: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    100deg,
+    #ff4d4d, #ff9a3c, #ffd93d, #4ade80, #38bdf8, #a78bfa, #f472b6, #ff4d4d
+  );
+  background-size: 300% 100%;
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+
+/* Fade up to full colour, drift across, fade back to the hairline. */
+.role-desc.is-switching .role-desc-sweep {
+  animation: role-desc-sweep 1.5s ease-in-out forwards;
+}
+
+.role-desc.is-switching .role-desc-title,
+.role-desc.is-switching .role-desc-body {
+  animation: role-desc-text 0.5s ease-out;
+}
+
+@keyframes role-desc-sweep {
+  0%   { opacity: 0; background-position: 0% 50%; }
+  22%  { opacity: 1; }
+  68%  { opacity: 1; }
+  100% { opacity: 0; background-position: 100% 50%; }
+}
+
+@keyframes role-desc-text {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* --- Resume upload -------------------------------------------------------- */
+
+/* The native control cannot be styled, so it is hidden from sight but kept
+   focusable and in the tab order — the visible label below is its proxy. */
+.c-file-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.c-file {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 50px;
+  padding: 8px 18px 8px 8px;
+  border: 1px solid var(--hair);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  cursor: pointer;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.c-file:hover {
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+/* Keyboard focus lands on the hidden input, so the ring is drawn on the
+   label that stands in for it. */
+.c-file-input:focus-visible + .c-file {
+  border-color: rgba(255, 255, 255, 0.75);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.c-file-btn {
+  flex: none;
+  padding: 0 18px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 45px;
+  background: var(--on-ink);
+  color: var(--ink);
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.c-file-name {
+  min-width: 0;
+  font-size: 14px;
+  line-height: 1.35;
+  color: rgba(255, 255, 255, 0.34);
+  overflow-wrap: anywhere;
+}
+
+.c-file-name[data-has-file] {
+  color: var(--on-ink);
+}
+
+/* --- Equity field --------------------------------------------------------
+   A number input with a unit pinned inside it. The spinner arrows are the
+   OS's own and read as a smudge on a dark field, so they come off.
+   -------------------------------------------------------------------------- */
+
+.c-suffix-field {
+  position: relative;
+}
+
+.c-suffix-field .c-input {
+  padding-right: 44px;
+}
+
+.c-suffix {
+  position: absolute;
+  top: 0;
+  right: 18px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  font-size: 16px;
+  font-weight: 300;
+  color: var(--muted);
+  pointer-events: none;
+}
+
+.c-suffix-field input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.c-suffix-field input[type="number"]::-webkit-outer-spin-button,
+.c-suffix-field input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.c-req {
+  margin-left: 6px;
+  padding: 2px 8px;
+  border: 1px solid var(--hair);
+  border-radius: 45px;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--on-ink);
+}
+
+.c-help {
+  margin: 10px 0 0;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--muted);
+}
+
+/* Motion here is decoration; the colour change alone still reads. */
+@media (prefers-reduced-motion: reduce) {
+  .role-desc.is-switching .role-desc-sweep,
+  .role-desc.is-switching .role-desc-title,
+  .role-desc.is-switching .role-desc-body {
+    animation-duration: 0.01ms;
+  }
+}
+
 .c-actions {
   grid-column: 1 / -1;
   display: flex;

@@ -50,32 +50,106 @@ Pick **one** of these two. You do not need both.
 ### Option A — the form on the page, into your own Google Sheet
 
 Same mechanism as the waitlist, so the data lands in a sheet you own and can
-download as Excel whenever you like. Five minutes, once:
+download as Excel whenever you like. Ten minutes, once. Follow these in order.
 
-1. **Make the sheet.** Go to <https://sheets.new>, name it **GymAI
-   Applications**. No columns needed — the script creates them.
-2. **Extensions → Apps Script.** Select everything in `Code.gs`, delete it, and
-   paste in the whole of **`careers-sheet.gs`** from this folder. Save.
-3. **Deploy → New deployment.** Gear icon → **Web app**. Then:
-   - **Execute as:** *Me*
-   - **Who has access:** ***Anyone*** ← this matters. "Anyone with a Google
-     account" will **not** work; people visiting the site are not signed in.
-4. Authorise it. On the "Google hasn't verified this app" screen click
-   **Advanced → Go to (project) (unsafe) → Allow**. That warning is normal for a
-   script you wrote yourself — you are granting your own script access to your
-   own sheet.
-5. Copy the **Web app URL** (it ends in `/exec`) and paste it into `config.js`:
+**1. Make the sheet.**
+Go to <https://sheets.new>. Rename it **GymAI Applications** (click "Untitled
+spreadsheet" at the top left and type). Do *not* add any columns — the script
+writes its own header row the first time an application arrives.
 
-   ```js
-   window.GYMAI_CAREERS_ENDPOINT = "https://script.google.com/macros/s/AKfy..../exec";
-   ```
+**2. Open the script editor.**
+In that sheet: **Extensions → Apps Script**. A new tab opens with a file called
+`Code.gs` containing a stub `myFunction`.
 
-**Check it worked:** paste the `/exec` URL straight into a browser tab. It should
-print `{"result":"success","message":"GymAI careers endpoint is live."}`. If it
-asks you to sign in instead, "Who has access" in step 3 is wrong.
+**3. Paste the script in.**
+Click inside `Code.gs`, select all (**Ctrl+A**), delete it, then paste in the
+entire contents of **`careers-sheet.gs`** from this folder. Save
+(**Ctrl+S**).
 
-Then submit a test application on the site — a row should appear within a second
-or two.
+**4. Put your email address in.**
+Near the top of what you just pasted, find this line:
+
+```js
+var NOTIFY_EMAIL = '';
+```
+
+Put your address between the quotes:
+
+```js
+var NOTIFY_EMAIL = 'you@gmail.com';
+```
+
+That is the whole email setup — every application sends you a mail with the
+applicant's name, role, equity number, resume link and answers, and hitting
+**Reply** in your inbox writes straight to the applicant. Save again.
+
+**5. Deploy it as a web app.**
+Top right: **Deploy → New deployment**. Click the gear icon beside "Select
+type" and choose **Web app**. Then:
+
+- **Description:** anything, e.g. `careers v1`
+- **Execute as:** **Me**
+- **Who has access:** **Anyone** ← this one matters. "Anyone with a Google
+  account" will **not** work; people visiting your site are not signed in.
+
+Press **Deploy**.
+
+**6. Authorise it.**
+Google asks for permission the first time. Click **Authorize access**, pick your
+account, then on the "Google hasn't verified this app" screen click
+**Advanced → Go to (project name) (unsafe) → Allow**. That warning is normal for
+a script you pasted in yourself — you are granting your own script access to
+your own sheet, Drive folder and mail.
+
+It asks for three things, and each one is used for exactly one job: the
+spreadsheet (writing the row), Drive (saving the resume file), and sending mail
+as you (the alert).
+
+**7. Copy the URL into `config.js`.**
+The deploy dialog shows a **Web app URL** ending in `/exec`. Copy it, open
+`config.js` in this folder, and paste it here:
+
+```js
+window.GYMAI_CAREERS_ENDPOINT = "https://script.google.com/macros/s/AKfy..../exec";
+```
+
+Save. That is it — the form is live.
+
+**8. Check it worked.**
+Paste the `/exec` URL straight into a browser tab. It should print
+`{"result":"success","message":"GymAI careers endpoint is live."}`. If it asks
+you to sign in instead, "Who has access" in step 5 is wrong — fix it and
+re-deploy (see "Re-deploying" below).
+
+Then submit a real test application on your own site with a small PDF attached.
+Within a second or two you should get **all three**: a new row in the sheet, a
+file in a Drive folder called **GymAI Resumes**, and an email in your inbox.
+
+#### What lands in the sheet
+
+One row per application, these columns:
+
+| Applied | Name | Email | Role | Resume | Link | Equity asked (%) | Why GymAI | Source | Referrer |
+|---|---|---|---|---|---|---|---|---|---|
+
+**Resume** is a clickable Drive link. The file itself is saved to a Drive folder
+named **GymAI Resumes**, created automatically the first time, named
+`2026-09-15 - Alex Rivera - Computer Vision Engineer.pdf` so the folder sorts and
+reads on its own. Each file is set to "anyone with the link can view" — without
+that, the link in the sheet would be dead to everyone except the account that
+owns the script.
+
+**To get it as Excel:** **File → Download → Microsoft Excel (.xlsx)** in the
+sheet, any time. The resume column comes across as links, and the files stay in
+Drive.
+
+#### If you would rather not have the script send the mail
+
+Leave `NOTIFY_EMAIL` as `''` and use Google's own alerting instead: in the sheet,
+**Tools → Notification settings → Edit notifications → "Any changes are made" →
+"Email — right away"**. It is one click, but the email only says the sheet
+changed — it does not contain the application. The script's own email is better;
+this is the fallback.
 
 ### Option B — embed a Google Form instead
 
@@ -115,8 +189,15 @@ hide it.
 - **Until it's connected**, the form deliberately refuses to submit and says so,
   rather than pretending to send an application and dropping it.
 - **Export to Excel** any time: **File → Download → Microsoft Excel (.xlsx)**.
-- **Email alerts on new applications:** in the sheet, **Tools → Notification
-  settings → Edit notifications → "Any changes are made" → "Email — right away"**.
+- **Email alerts** come from the script itself — set `NOTIFY_EMAIL` in
+  `careers-sheet.gs` (step 4 above). Gmail allows around 100 of these a day on a
+  free account, far more than you will get; if it ever runs out, the row is still
+  written and only the email is skipped.
+- **Resumes are required** on the form: one page, any of PDF / Word / an image,
+  up to 5 MB. We cannot actually count the pages in a browser, so the one-page
+  ask is made in the wording under the field rather than enforced.
+- **A resume that fails to upload never costs you the application.** The row is
+  still written and the Resume cell says what went wrong instead of a link.
 - **Duplicates are skipped** on email + role, so a double-press writes one row.
   The same person applying for a *different* role still gets their own row.
 - **Re-deploying after edits to the script:** **Deploy → Manage deployments →

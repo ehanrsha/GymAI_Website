@@ -134,6 +134,11 @@
               hire.
             </p>
             <p>
+              One page of resume is required, and it does not have to be about
+              the role — send the work you are proudest of. We are reading for
+              ambition.
+            </p>
+            <p>
               A link to your work says more than a cover letter: GitHub, a
               portfolio, LinkedIn, a demo video, anything you're proud of.
             </p>
@@ -170,11 +175,57 @@
                 <select class="c-select" id="role" name="role"></select>
               </div>
 
+              <!-- The description of whatever is selected above. Swapped out on
+                   every change, with a rainbow sweep across the outline so the
+                   switch is impossible to miss. -->
+              <div class="c-field-row">
+                <div class="role-desc" id="role-desc" aria-live="polite" hidden>
+                  <span class="role-desc-sweep" aria-hidden="true"></span>
+                  <p class="role-desc-title" id="role-desc-title"></p>
+                  <p class="role-desc-body" id="role-desc-body"></p>
+                </div>
+              </div>
+
+              <div class="c-field-row">
+                <label class="c-label" for="resume">Resume <span class="c-req">required</span></label>
+
+                <input class="c-file-input" id="resume" name="resume" type="file"
+                       accept=".pdf,.doc,.docx,.png,.jpg,.jpeg,application/pdf" required>
+
+                <label class="c-file" for="resume">
+                  <span class="c-file-btn">Choose file</span>
+                  <span class="c-file-name" id="resume-name">No file chosen</span>
+                </label>
+
+                <p class="c-help">
+                  One page, showing off your most impressive work. It
+                  <em>does not</em> have to be relevant to the role you are
+                  applying for — we are reading it for ambition and for what you
+                  are capable of, not for a keyword match. PDF, Word or an
+                  image, up to 5&nbsp;MB.
+                </p>
+              </div>
+
               <div class="c-field-row">
                 <label class="c-label" for="link">Link to your work</label>
                 <input class="c-input" id="link" name="link" type="url"
                        inputmode="url" autocapitalize="off" spellcheck="false"
                        placeholder="https://github.com/you">
+              </div>
+
+              <div class="c-field-row">
+                <label class="c-label" for="equity">How much equity are you looking for?</label>
+                <div class="c-suffix-field">
+                  <input class="c-input" id="equity" name="equity" type="number"
+                         inputmode="decimal" min="0" max="100" step="any"
+                         autocomplete="off" placeholder="e.g. 2.5">
+                  <span class="c-suffix" aria-hidden="true">%</span>
+                </div>
+                <p class="c-help">
+                  A number, and an honest one. There is no wrong answer here and
+                  it will not rule you out — we would rather talk about it now
+                  than at the end.
+                </p>
               </div>
 
               <div class="c-field-row">
@@ -310,6 +361,12 @@
     var label = document.getElementById("apply-submit-label");
     var select = document.getElementById("role");
 
+    var desc = document.getElementById("role-desc");
+    var descTitle = document.getElementById("role-desc-title");
+    var descBody = document.getElementById("role-desc-body");
+    var resume = document.getElementById("resume");
+    var resumeName = document.getElementById("resume-name");
+
     if (CONTACT) {
       document.getElementById("apply-contact").innerHTML =
         'Prefer email? <a href="mailto:' + esc(CONTACT) + '">' + esc(CONTACT) + "</a>.";
@@ -333,11 +390,59 @@
 
     // Role options mirror the posted roles, so the sheet column matches the
     // listings without anyone maintaining two lists.
-    var options = ROLES.map(function (role) { return esc(role.title); });
-    options.push("General / future openings");
+    var GENERAL = "General / future openings";
+    var GENERAL_BLURB =
+      "None of the roles above quite fit, but you think we are missing a hire " +
+      "— and that hire is you. Tell us what you would own and why it matters " +
+      "more than anything on the list.";
+
+    var options = ROLES.map(function (role) { return String(role.title); });
+    options.push(GENERAL);
     select.innerHTML = options.map(function (title) {
-      return '<option value="' + title + '">' + title + "</option>";
+      return '<option value="' + esc(title) + '">' + esc(title) + "</option>";
     }).join("");
+
+    // Title -> description, so a change on the dropdown is a single lookup.
+    var BLURBS = {};
+    ROLES.forEach(function (role) {
+      if (role.blurb) BLURBS[String(role.title)] = String(role.blurb);
+    });
+    BLURBS[GENERAL] = GENERAL_BLURB;
+
+    /* The description box. `animate` is false for the very first paint — the
+       rainbow marks a *change*, so firing it on page load would be noise. */
+    function showRole(animate) {
+      var title = select.value;
+      var text = BLURBS[title] || "";
+
+      if (!text) {
+        desc.hidden = true;
+        return;
+      }
+
+      descTitle.textContent = title;
+      descBody.textContent = text;
+      desc.hidden = false;
+
+      if (!animate) return;
+
+      // Restarting a running animation needs the class gone and the element
+      // reflowed before it goes back on, or the browser keeps the old run.
+      desc.classList.remove("is-switching");
+      void desc.offsetWidth;
+      desc.classList.add("is-switching");
+    }
+
+    // Only the sweep ends the switch — the text fade is shorter, and matching
+    // on it too would cut the rainbow off halfway.
+    desc.addEventListener("animationend", function (event) {
+      if (event.animationName === "role-desc-sweep") {
+        desc.classList.remove("is-switching");
+      }
+    });
+
+    select.addEventListener("change", function () { showRole(true); });
+    showRole(false);
 
     // A role row with no link of its own scrolls down to this form — set the
     // dropdown to it on the way, so nobody has to pick it twice.
@@ -348,11 +453,67 @@
       var wanted = link.getAttribute("data-role");
       for (var i = 0; i < select.options.length; i++) {
         if (select.options[i].value === wanted) {
-          select.selectedIndex = i;
+          if (select.selectedIndex !== i) {
+            select.selectedIndex = i;
+            showRole(true);
+          }
           return;
         }
       }
     });
+
+    /* ------------------------------------------------------------------
+       Resume
+
+       Apps Script cannot read a multipart upload from a no-preflight POST,
+       so the file rides along as base64 in the same form body and is turned
+       back into a Drive file on the other side. 5MB of file is ~6.8MB of
+       base64, comfortably inside the POST limit.
+       ------------------------------------------------------------------ */
+
+    var MAX_BYTES = 5 * 1024 * 1024;
+
+    function prettySize(bytes) {
+      return bytes < 1024 * 1024
+        ? Math.max(1, Math.round(bytes / 1024)) + " KB"
+        : (bytes / (1024 * 1024)).toFixed(1) + " MB";
+    }
+
+    resume.addEventListener("change", function () {
+      var file = resume.files && resume.files[0];
+
+      if (!file) {
+        resumeName.textContent = "No file chosen";
+        resumeName.removeAttribute("data-has-file");
+        return;
+      }
+
+      if (file.size > MAX_BYTES) {
+        resume.value = "";
+        resumeName.textContent = "No file chosen";
+        resumeName.removeAttribute("data-has-file");
+        say("That file is " + prettySize(file.size) + " — 5 MB is the limit.", "error");
+        return;
+      }
+
+      resumeName.textContent = file.name + " · " + prettySize(file.size);
+      resumeName.setAttribute("data-has-file", "");
+      say("");
+    });
+
+    // FileReader gives back a data: URL; the sheet only wants what follows
+    // the comma.
+    function readBase64(file) {
+      return new Promise(function (resolve, reject) {
+        var reader = new FileReader();
+        reader.onload = function () {
+          var result = String(reader.result || "");
+          resolve(result.slice(result.indexOf(",") + 1));
+        };
+        reader.onerror = function () { reject(new Error("read failed")); };
+        reader.readAsDataURL(file);
+      });
+    }
 
     function say(message, state) {
       status.textContent = message;
@@ -394,47 +555,67 @@
         return;
       }
 
+      var file = resume.files && resume.files[0];
+
+      if (!file) {
+        say("A resume is required — one page of your most impressive work.", "error");
+        resume.focus();
+        return;
+      }
+
+      if (file.size > MAX_BYTES) {
+        say("That file is " + prettySize(file.size) + " — 5 MB is the limit.", "error");
+        return;
+      }
+
       if (!ENDPOINT) {
         say("Applications aren't connected yet. Add your endpoint to config.js.", "error");
         return;
       }
 
       busy(true);
-      say("");
+      say("Attaching your resume…");
 
-      // URLSearchParams keeps this a "simple" request, so the browser sends it
-      // without a CORS preflight — Apps Script cannot answer an OPTIONS call.
-      var body = new URLSearchParams({
-        name: name,
-        email: email,
-        role: select.value,
-        link: link,
-        note: fields.namedItem("note").value.trim(),
-        company: fields.namedItem("company").value,
-        source: "careers.html",
-        ref: document.referrer || ""
-      });
+      readBase64(file).then(function (base64) {
+        say("");
 
-      fetch(ENDPOINT, { method: "POST", body: body })
-        .then(function (response) { return response.json(); })
-        .then(function (data) {
-          if (data && data.result === "success") {
-            succeed();
-          } else {
-            throw new Error((data && data.message) || "Unexpected response");
-          }
-        })
-        .catch(function () {
-          // The response could not be read — usually a CORS quirk on the
-          // redirect Apps Script issues, not a failure to save. Re-send in
-          // opaque mode so the row is definitely written, then continue.
-          return fetch(ENDPOINT, { method: "POST", mode: "no-cors", body: body })
-            .then(succeed)
-            .catch(function () {
-              busy(false);
-              say("Something went wrong on our end. Please try again.", "error");
-            });
+        // URLSearchParams keeps this a "simple" request, so the browser sends it
+        // without a CORS preflight — Apps Script cannot answer an OPTIONS call.
+        var body = new URLSearchParams({
+          name: name,
+          email: email,
+          role: select.value,
+          link: link,
+          note: fields.namedItem("note").value.trim(),
+          equity: fields.namedItem("equity").value.trim(),
+          resumeName: file.name,
+          resumeType: file.type || "application/octet-stream",
+          resumeData: base64,
+          company: fields.namedItem("company").value,
+          source: "careers.html",
+          ref: document.referrer || ""
         });
+
+        return fetch(ENDPOINT, { method: "POST", body: body })
+          .then(function (response) { return response.json(); })
+          .then(function (data) {
+            if (data && data.result === "success") {
+              succeed();
+            } else {
+              throw new Error((data && data.message) || "Unexpected response");
+            }
+          })
+          .catch(function () {
+            // The response could not be read — usually a CORS quirk on the
+            // redirect Apps Script issues, not a failure to save. Re-send in
+            // opaque mode so the row is definitely written, then continue.
+            return fetch(ENDPOINT, { method: "POST", mode: "no-cors", body: body })
+              .then(succeed);
+          });
+      }).catch(function () {
+        busy(false);
+        say("Something went wrong on our end. Please try again.", "error");
+      });
 
       function succeed() {
         form.hidden = true;
