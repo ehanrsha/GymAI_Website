@@ -35,6 +35,7 @@ window.GYMAI_WAITLIST_ENDPOINT = "https://script.google.com/macros/s/AKfycbwcW9c
                under the Role dropdown on the application form, and swaps
                over (with a rainbow sweep) whenever the dropdown changes,
                so nobody applies without knowing what they applied for.
+     filled    optional. true shows a checkmark in place of the arrow.
      link      optional. Where applying happens. Any URL works — a Google
                Form, a Notion page, an Ashby/Greenhouse posting, even a
                "mailto:jobs@..." link. Opens in a new tab.
@@ -49,6 +50,7 @@ window.GYMAI_CAREERS_ROLES = [
     team: "Growth",
     location: "Remote/In-Person",
     type: "Founding",
+    filled: true,
     blurb: "You own growth. That means getting GymAI in front of real people: " +
            "partnerships with gyms and studios, deals with influencers and " +
            "creators in the fitness space, and the campaigns that turn all of " +
@@ -63,6 +65,7 @@ window.GYMAI_CAREERS_ROLES = [
     team: "Engineering",
     location: "Remote/In-Person",
     type: "Founding",
+    filled: true,
     blurb: "You own the tech stack and the app. React Native and Expo on the " +
            "front, the data and analytics layer behind it, and every feature " +
            "in between — shipped, not prototyped. You will make the calls with the CEO on " +
@@ -75,6 +78,7 @@ window.GYMAI_CAREERS_ROLES = [
     team: "Engineering",
     location: "Remote/In-Person",
     type: "Full-time",
+    filled: true,
     blurb: "You own what the camera sees. Reading a machine, a plate stack and " +
            "a rep accurately from a phone camera — in bad gym lighting, at odd " +
            "angles, on a cheap device — is the hardest problem we have, and it " +

@@ -313,6 +313,14 @@
         "</svg>" +
       "</span>";
 
+    var CHECK =
+      '<span class="role-arrow" aria-hidden="true">' +
+        '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" ' +
+             'stroke-linecap="round" stroke-linejoin="round">' +
+          '<path d="M3.5 8.5l3 3 6-7"/>' +
+        "</svg>" +
+      "</span>";
+
     if (ROLES.length) {
       list.innerHTML = ROLES.map(function (role) {
         // A role with its own link (Ashby, Notion, a Google Form, a mailto)
@@ -337,7 +345,7 @@
                 '<h3 class="role-title">' + esc(role.title) + "</h3>" +
                 (meta ? '<p class="role-meta">' + meta + "</p>" : "") +
               "</div>" +
-              ARROW +
+              (role.filled ? CHECK : ARROW) +
             "</a>" +
           "</li>"
         );
